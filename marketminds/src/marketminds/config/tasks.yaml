@@ -1,17 +1,8 @@
-research_task:
+news_summary_task:
   description: >
-    Conduct a thorough research about {topic}
-    Make sure you find any interesting and relevant information given
-    the current year is {current_year}.
+    Conduct a comprehensive search for the latest news on the company '{company}'.
+    Analyze the gathered articles to identify significant developments and market sentiment
+    (positive, negative, or neutral).
   expected_output: >
-    A list with 10 bullet points of the most relevant information about {topic}
-  agent: researcher
-
-reporting_task:
-  description: >
-    Review the context you got and expand each topic into a full section for a report.
-    Make sure the report is detailed and contains any and all relevant information.
-  expected_output: >
-    A fully fledged report with the main topics, each with a full section of information.
-    Formatted as markdown without '```'
-  agent: reporting_analyst
+    A concise, bullet-pointed summary of the key news findings, including the top 3-5 headlines,
+    an analysis of the overall sentiment, and a concluding sentence on the potential stock impact.

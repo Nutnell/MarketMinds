@@ -1,12 +1,20 @@
 [project]
 name = "marketminds"
 version = "0.1.0"
-description = "MarketMinds using crewAI"
-authors = [{ name = "Your Name", email = "you@example.com" }]
+description = "MarketMinds AI Crew"
+authors = [{ name = "Nutnell", email = "nutnell00@gmail.com" }]
 requires-python = ">=3.10,<3.14"
 dependencies = [
-    "crewai[tools]>=0.152.0,<1.0.0"
+    "crewai[tools]>=0.152.0,<1.0.0",
+    "python-dotenv",
+    "requests",
+    "langchain",
+    "langchain_community",
+
 ]
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [project.scripts]
 marketminds = "marketminds.main:run"
