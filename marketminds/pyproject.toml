@@ -12,6 +12,14 @@ dependencies = [
     "langchain_community",
     "fastapi",
     "uvicorn[standard]",
+    "python-multipart",
+    "passlib[bcrypt]",
+    "python-jose",
+    "argon2-cffi",
+
+
+
+
 ]
 
 [tool.setuptools.packages.find]
