@@ -6,7 +6,8 @@ def run():
     Run the crew.
     """
     inputs = {
-        'company': 'Tesla'
+        'company': 'Microsoft',
+        'company_ticker': 'MSFT'
     }
     MarketmindsCrew().crew().kickoff(inputs=inputs)
 

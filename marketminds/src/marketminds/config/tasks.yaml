@@ -6,3 +6,14 @@ news_summary_task:
   expected_output: >
     A concise, bullet-pointed summary of the key news findings, including the top 3-5 headlines,
     an analysis of the overall sentiment, and a concluding sentence on the potential stock impact.
+
+financial_analysis_task:
+  description: >
+    Using the stock ticker '{company_ticker}', perform a fundamental analysis of the company.
+    First, retrieve the company's profile to understand its business.
+    Then, pull its latest annual income statement to assess its financial performance.
+  expected_output: >
+    A two-part report:
+    1.  **Company Overview:** A brief summary of the company's business, industry, and market cap.
+    2.  **Financial Highlights:** A bulleted list of the key figures from the income statement, including
+        Total Revenue, Gross Profit, and Net Income.
