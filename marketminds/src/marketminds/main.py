@@ -1,15 +1,15 @@
 #!/usr/bin/env python
-from marketminds.crew import MarketmindsCrew
+from marketminds.crew import MarketmindsCrewService
 
 def run():
     """
     Run the crew.
     """
     inputs = {
-        'company': 'Microsoft',
-        'company_ticker': 'MSFT'
+        'company': 'APPLE',
+        'company_ticker': 'AAPL'
     }
-    MarketmindsCrew().crew().kickoff(inputs=inputs)
+    MarketmindsCrewService().crew().kickoff(inputs=inputs)
 
 if __name__ == "__main__":
     run()

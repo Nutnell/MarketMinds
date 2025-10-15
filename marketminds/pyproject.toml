@@ -10,7 +10,8 @@ dependencies = [
     "requests",
     "langchain",
     "langchain_community",
-
+    "fastapi",
+    "uvicorn[standard]",
 ]
 
 [tool.setuptools.packages.find]

@@ -10,7 +10,7 @@ from marketminds.tools.stock_analysis_tools import (
 
 
 @CrewBase
-class MarketmindsCrew:
+class MarketmindsCrewService:
     """Marketminds crew"""
 
     agents_config = "config/agents.yaml"
