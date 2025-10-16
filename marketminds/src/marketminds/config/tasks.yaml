@@ -17,3 +17,11 @@ financial_analysis_task:
     1.  **Company Overview:** A brief summary of the company's business, industry, and market cap.
     2.  **Financial Highlights:** A bulleted list of the key figures from the income statement, including
         Total Revenue, Gross Profit, and Net Income.
+
+research_task:
+  description: >
+    Using the provided research query '{research_query}', search the knowledge base
+    to find information about that specific investment strategy.
+  expected_output: >
+    A clear and concise explanation of the investment strategy found in the knowledge base,
+    summarizing the key principles and citing the source document.

@@ -16,6 +16,8 @@ dependencies = [
     "passlib[bcrypt]",
     "python-jose",
     "argon2-cffi",
+    "chromadb",
+    "langchain-openai",
 
 
 

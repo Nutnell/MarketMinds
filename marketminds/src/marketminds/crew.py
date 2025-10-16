@@ -2,17 +2,15 @@ from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task, tool
 
 from marketminds.tools.custom_tool import NewsSearchTool
-
 from marketminds.tools.stock_analysis_tools import (
     CompanyProfileTool,
     FinancialStatementsTool,
 )
+from marketminds.tools.rag_tools import RAGTool
 
 
 @CrewBase
 class MarketmindsCrewService:
-    """Marketminds crew"""
-
     agents_config = "config/agents.yaml"
     tasks_config = "config/tasks.yaml"
 
@@ -28,6 +26,10 @@ class MarketmindsCrewService:
     def financial_statements_tool(self) -> FinancialStatementsTool:
         return FinancialStatementsTool()
 
+    @tool
+    def knowledge_base_tool(self) -> RAGTool:
+        return RAGTool()
+
     @agent
     def news_and_sentiment_agent(self) -> Agent:
         return Agent(
@@ -41,6 +43,14 @@ class MarketmindsCrewService:
         return Agent(
             config=self.agents_config["stock_analyst_agent"],
             tools=[self.company_profile_tool(), self.financial_statements_tool()],
+            verbose=True,
+        )
+
+    @agent
+    def research_analyst_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config["research_analyst_agent"],
+            tools=[self.knowledge_base_tool()],
             verbose=True,
         )
 
@@ -60,9 +70,16 @@ class MarketmindsCrewService:
             output_file="analysis.md",
         )
 
+    @task
+    def research_task(self) -> Task:
+        return Task(
+            config=self.tasks_config["research_task"],
+            agent=self.research_analyst_agent(),
+            output_file="research.md",
+        )
+
     @crew
     def crew(self) -> Crew:
-        """Creates the Marketminds crew"""
         return Crew(
             agents=self.agents,
             tasks=self.tasks,
