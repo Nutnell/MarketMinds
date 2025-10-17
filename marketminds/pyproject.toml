@@ -27,6 +27,9 @@ dependencies = [
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/marketminds"]
+
 [project.scripts]
 marketminds = "marketminds.main:run"
 run_crew = "marketminds.main:run"

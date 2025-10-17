@@ -1,0 +1,24 @@
+services:
+  api:
+    build: .
+    container_name: marketminds
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./storage:/app/storage
+    env_file:
+      - .env
+    depends_on:
+      - chroma
+    command: uvicorn src.marketminds.server:app --host 0.0.0.0 --port 8000
+
+  chroma:
+    image: chromadb/chroma
+    container_name: marketminds_chroma
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/.chroma/
+
+volumes:
+  chroma_data:
