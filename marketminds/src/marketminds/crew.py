@@ -59,7 +59,6 @@ class MarketmindsCrewService:
         return Task(
             config=self.tasks_config["news_summary_task"],
             agent=self.news_and_sentiment_agent(),
-            output_file="report.md",
         )
 
     @task
@@ -67,7 +66,6 @@ class MarketmindsCrewService:
         return Task(
             config=self.tasks_config["financial_analysis_task"],
             agent=self.stock_analyst_agent(),
-            output_file="analysis.md",
         )
 
     @task
@@ -75,7 +73,6 @@ class MarketmindsCrewService:
         return Task(
             config=self.tasks_config["research_task"],
             agent=self.research_analyst_agent(),
-            output_file="research.md",
         )
 
     @crew
