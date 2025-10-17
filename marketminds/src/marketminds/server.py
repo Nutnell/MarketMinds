@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Depends, HTTPException, status
-
 from fastapi.security import (
     OAuth2PasswordRequestForm,
     HTTPBearer,
@@ -8,9 +7,10 @@ from fastapi.security import (
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Annotated
-
 from .crew import MarketmindsCrewService
 from . import auth, schemas
+from .tools.custom_tool import NewsSearchTool
+news_tool_for_automation = NewsSearchTool()
 
 mock_users_db = {
     "nutnell00@gmail.com": {
@@ -44,6 +44,7 @@ async def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
 ):
     """A simplified dependency to check for a valid bearer token."""
+
     if not credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -95,3 +96,14 @@ async def run_crew(
         return {"result": result, "user": current_user.username}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/internal/get-news/{search_query}", tags=["Internal Automation"])
+def get_news_for_automation(search_query: str):
+    """
+    An unsecured internal endpoint for n8n to fetch news.
+    """
+    try:
+        result = news_tool_for_automation._run(search_query=search_query)
+        return {"news_summary": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))        
