@@ -14,14 +14,20 @@ from .chain import (
     FinancialsAndResearchChain,
     FullAnalysisChain,
     MasterChain,
+    CryptoAnalysisChain,
+    EconomicAnalysisChain,
+    GlobalMarketChain,
+    CryptoHistoricalChain,
+    NewsAndCryptoChain,
+    FinancialsAndCryptoChain,
 )
 from .tools.custom_tool import NewsSearchTool
 
 load_dotenv()
 app = FastAPI(
-    title="MarketMinds AI API (v3.0 - Master Router)",
-    description="A flexible API with a master router endpoint (/api/v1/chat) and specific agent workflows.",
-    version="3.0.0",
+    title="MarketMinds AI API (v4.0 - Global Markets)",
+    description="A comprehensive API with a master router and specific endpoints for all asset classes.",
+    version="4.0.0",
 )
 app.add_middleware(
     CORSMiddleware,
@@ -69,21 +75,25 @@ def get_news_for_automation(search_query: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# --- All Endpoints ---
 add_routes(app, NewsAnalysisChain, path="/api/v1/agents/news")
 add_routes(app, FinancialAnalysisChain, path="/api/v1/agents/financials")
 add_routes(app, KnowledgeSearchChain, path="/api/v1/agents/research")
-
+add_routes(app, CryptoAnalysisChain, path="/api/v1/agents/crypto")
+add_routes(app, CryptoHistoricalChain, path="/api/v1/agents/crypto_chart")
+add_routes(app, EconomicAnalysisChain, path="/api/v1/agents/economics")
+add_routes(app, GlobalMarketChain, path="/api/v1/agents/markets")
 add_routes(app, NewsAndFinancialsChain, path="/api/v1/agents/news_and_financials")
 add_routes(app, NewsAndResearchChain, path="/api/v1/agents/news_and_research")
 add_routes(
     app, FinancialsAndResearchChain, path="/api/v1/agents/financials_and_research"
 )
-
+add_routes(app, NewsAndCryptoChain, path="/api/v1/agents/news_and_crypto")
+add_routes(app, FinancialsAndCryptoChain, path="/api/v1/agents/financials_and_crypto")
 add_routes(app, FullAnalysisChain, path="/api/v1/agents/full_analysis")
-
 add_routes(app, MasterChain, path="/api/v1/chat")
 
 
 @app.get("/", tags=["Root"])
 def read_root():
-    return {"message": "Welcome to MarketMinds v3.0. Go to /docs to see all endpoints."}
+    return {"message": "Welcome to MarketMinds v4.0. Go to /docs to see all endpoints."}

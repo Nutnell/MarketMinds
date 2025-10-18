@@ -1,3 +1,4 @@
+import os
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task, tool
 
@@ -7,12 +8,19 @@ from marketminds.tools.stock_analysis_tools import (
     FinancialStatementsTool,
 )
 from marketminds.tools.rag_tools import RAGTool
+from marketminds.tools.crypto_economic_tools import CryptoInfoTool, MacroEconomicTool
+from marketminds.tools.market_data_tools import MarketQuoteTool
+from marketminds.tools.crypto_economic_tools import CryptoHistoricalTool
+
+
+def get_config_path(file_name):
+    return os.path.join(os.path.dirname(__file__), "config", file_name)
 
 
 @CrewBase
 class MarketmindsCrewService:
-    agents_config = "config/agents.yaml"
-    tasks_config = "config/tasks.yaml"
+    agents_config = get_config_path("agents.yaml")
+    tasks_config = get_config_path("tasks.yaml")
 
     @tool
     def news_search_tool(self) -> NewsSearchTool:
@@ -30,12 +38,27 @@ class MarketmindsCrewService:
     def knowledge_base_tool(self) -> RAGTool:
         return RAGTool()
 
+    @tool
+    def crypto_info_tool(self) -> CryptoInfoTool:
+        return CryptoInfoTool()
+
+    @tool
+    def macro_economic_tool(self) -> MacroEconomicTool:
+        return MacroEconomicTool()
+
+    @tool
+    def market_quote_tool(self) -> MarketQuoteTool:
+        return MarketQuoteTool()
+
+    @tool
+    def crypto_historical_tool(self) -> CryptoHistoricalTool:
+        return CryptoHistoricalTool()
+
     @agent
     def news_and_sentiment_agent(self) -> Agent:
         return Agent(
             config=self.agents_config["news_and_sentiment_agent"],
             tools=[self.news_search_tool()],
-            verbose=True,
         )
 
     @agent
@@ -43,7 +66,6 @@ class MarketmindsCrewService:
         return Agent(
             config=self.agents_config["stock_analyst_agent"],
             tools=[self.company_profile_tool(), self.financial_statements_tool()],
-            verbose=True,
         )
 
     @agent
@@ -51,7 +73,27 @@ class MarketmindsCrewService:
         return Agent(
             config=self.agents_config["research_analyst_agent"],
             tools=[self.knowledge_base_tool()],
-            verbose=True,
+        )
+
+    @agent
+    def crypto_analyst_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config["crypto_analyst_agent"],
+            tools=[self.crypto_info_tool(), self.crypto_historical_tool()],
+        )
+
+    @agent
+    def economic_indicator_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config["economic_indicator_agent"],
+            tools=[self.macro_economic_tool()],
+        )
+
+    @agent
+    def global_markets_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config["global_markets_agent"],
+            tools=[self.market_quote_tool()],
         )
 
     @task
@@ -73,6 +115,34 @@ class MarketmindsCrewService:
         return Task(
             config=self.tasks_config["research_task"],
             agent=self.research_analyst_agent(),
+        )
+
+    @task
+    def crypto_analysis_task(self) -> Task:
+        return Task(
+            config=self.tasks_config["crypto_analysis_task"],
+            agent=self.crypto_analyst_agent(),
+        )
+
+    @task
+    def economic_analysis_task(self) -> Task:
+        return Task(
+            config=self.tasks_config["economic_analysis_task"],
+            agent=self.economic_indicator_agent(),
+        )
+
+    @task
+    def global_market_analysis_task(self) -> Task:
+        return Task(
+            config=self.tasks_config["global_market_analysis_task"],
+            agent=self.global_markets_agent(),
+        )
+
+    @task
+    def crypto_historical_analysis_task(self) -> Task:
+        return Task(
+            config=self.tasks_config["crypto_historical_analysis_task"],
+            agent=self.crypto_analyst_agent(),
         )
 
     @crew

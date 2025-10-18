@@ -25,3 +25,27 @@ research_task:
   expected_output: >
     A clear and concise explanation of the investment strategy found in the knowledge base,
     summarizing the key principles and citing the source document.
+
+crypto_analysis_task:
+  description: >
+    Retrieve and summarize the latest market data for the cryptocurrency '{crypto_name}'.
+  expected_output: >
+    A concise summary including the current price, market cap, rank, and a brief description of the project.
+
+economic_analysis_task:
+  description: >
+    Retrieve the latest data for the economic indicator '{indicator_name}'.
+  expected_output: >
+    A clear report stating the most recent value and date for the requested economic indicator.
+
+global_market_analysis_task:
+  description: >
+    Retrieve the latest price quote for the market symbol '{market_symbol}'.
+  expected_output: >
+    A concise report with the latest price, change, and change percentage for the requested symbol.
+
+crypto_historical_analysis_task:
+  description: >
+    Retrieve and summarize historical market data for the cryptocurrency '{coin_id}' over the past '{days}' days.
+  expected_output: >
+    A summary including the highest, lowest, and average price over the specified period.
