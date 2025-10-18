@@ -18,7 +18,9 @@ dependencies = [
     "argon2-cffi",
     "chromadb",
     "langchain-openai",
-    "langchain-chroma",
+    "langchain_chroma",
+    "langserve>=0.3.3",
+    "sse_starlette",
 
 
 
