@@ -13,14 +13,15 @@ from .chain import (
     NewsAndFinancialsChain,
     NewsAndResearchChain,
     FinancialsAndResearchChain,
+    FullAnalysisChain,
 )
 from .tools.custom_tool import NewsSearchTool
 
 load_dotenv()
 app = FastAPI(
-    title="MarketMinds AI API (v2.2 - Composable & Multi-Agent)",
-    description="A flexible API with distinct endpoints for single and dual AI agent workflows.",
-    version="2.2.0",
+    title="MarketMinds AI API (v2.3 - Full Analysis)",
+    description="A flexible API with distinct endpoints for single, dual, and full AI agent workflows.",
+    version="2.3.0",
 )
 app.add_middleware(
     CORSMiddleware,
@@ -67,6 +68,7 @@ def get_news_for_automation(search_query: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 add_routes(app, NewsAnalysisChain, path="/api/v1/agents/news")
 add_routes(app, FinancialAnalysisChain, path="/api/v1/agents/financials")
 add_routes(app, KnowledgeSearchChain, path="/api/v1/agents/research")
@@ -77,7 +79,9 @@ add_routes(
     app, FinancialsAndResearchChain, path="/api/v1/agents/financials_and_research"
 )
 
+add_routes(app, FullAnalysisChain, path="/api/v1/agents/full_analysis")
+
 
 @app.get("/", tags=["Root"])
 def read_root():
-    return {"message": "Welcome to MarketMinds v2.2. Go to /docs to see all endpoints."}
+    return {"message": "Welcome to MarketMinds v2.3. Go to /docs to see all endpoints."}

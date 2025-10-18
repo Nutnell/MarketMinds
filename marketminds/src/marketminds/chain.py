@@ -9,15 +9,9 @@ from .crew import MarketmindsCrewService
 
 
 class ExtractedInputs(BaseModel):
-    company: str = Field(
-        description="The name of the company mentioned, e.g., 'Tesla', 'Microsoft'. Defaults to 'market' if no specific company is mentioned."
-    )
-    company_ticker: str = Field(
-        description="The stock ticker symbol for the company, e.g., 'TSLA', 'MSFT'. Defaults to 'N/A' if not found or applicable."
-    )
-    research_query: str = Field(
-        description="The specific research question or topic, e.g., 'value investing', 'growth stocks'. Defaults to 'general analysis' if not specified."
-    )
+    company: str = Field(description="The name of the company mentioned.")
+    company_ticker: str = Field(description="The stock ticker symbol for the company.")
+    research_query: str = Field(description="The specific research question or topic.")
 
 
 extractor_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
@@ -53,9 +47,43 @@ class DualTaskRunnable(Runnable):
             agents=[task1.agent, task2.agent],
             tasks=[task1, task2],
             process=Process.sequential,
-            verbose=1,
+            verbose=2,
         )
         result = dual_task_crew.kickoff(inputs=extracted_inputs)
+        combined_output = "\n\n---\n\n".join(
+            [task_output.raw for task_output in result.tasks_output]
+        )
+        return {"output": combined_output}
+
+
+class TripleTaskRunnable(Runnable):
+    task_names: List[str]
+
+    def __init__(self, task_names: List[str]):
+        if len(task_names) != 3:
+            raise ValueError("TripleTaskRunnable requires exactly three task names.")
+        self.task_names = task_names
+
+    def invoke(
+        self, extracted_inputs: Dict, config: RunnableConfig = None
+    ) -> Dict[str, Any]:
+        crew_service = MarketmindsCrewService()
+
+        task1_method = getattr(crew_service, self.task_names[0])
+        task2_method = getattr(crew_service, self.task_names[1])
+        task3_method = getattr(crew_service, self.task_names[2])
+        task1 = task1_method()
+        task2 = task2_method()
+        task3 = task3_method()
+
+        full_crew = Crew(
+            agents=[task1.agent, task2.agent, task3.agent],
+            tasks=[task1, task2, task3],
+            process=Process.sequential,
+            verbose=1,
+        )
+
+        result = full_crew.kickoff(inputs=extracted_inputs)
         combined_output = "\n\n---\n\n".join(
             [task_output.raw for task_output in result.tasks_output]
         )
@@ -115,4 +143,11 @@ NewsAndResearchChain = (
 FinancialsAndResearchChain = (
     InputExtractorChain
     | DualTaskRunnable(task_names=["financial_analysis_task", "research_task"])
+).with_types(input_type=SimpleInput)
+
+FullAnalysisChain = (
+    InputExtractorChain
+    | TripleTaskRunnable(
+        task_names=["news_summary_task", "financial_analysis_task", "research_task"]
+    )
 ).with_types(input_type=SimpleInput)
