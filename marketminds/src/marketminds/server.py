@@ -6,18 +6,25 @@ from dotenv import load_dotenv
 
 from . import auth, schemas
 
-from .chain import NewsAnalysisChain, FinancialAnalysisChain, KnowledgeSearchChain
+from .chain import (
+    NewsAnalysisChain,
+    FinancialAnalysisChain,
+    KnowledgeSearchChain,
+    NewsAndFinancialsChain,
+    NewsAndResearchChain,
+    FinancialsAndResearchChain,
+)
 from .tools.custom_tool import NewsSearchTool
 
 load_dotenv()
 app = FastAPI(
-    title="MarketMinds AI API (v2.1 - Composable)",
-    description="A flexible API with distinct endpoints for each AI agent.",
-    version="2.1.0",
+    title="MarketMinds AI API (v2.2 - Composable & Multi-Agent)",
+    description="A flexible API with distinct endpoints for single and dual AI agent workflows.",
+    version="2.2.0",
 )
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -47,6 +54,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     access_token = auth.create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 news_tool_for_automation = NewsSearchTool()
 
 
@@ -63,9 +71,13 @@ add_routes(app, NewsAnalysisChain, path="/api/v1/agents/news")
 add_routes(app, FinancialAnalysisChain, path="/api/v1/agents/financials")
 add_routes(app, KnowledgeSearchChain, path="/api/v1/agents/research")
 
+add_routes(app, NewsAndFinancialsChain, path="/api/v1/agents/news_and_financials")
+add_routes(app, NewsAndResearchChain, path="/api/v1/agents/news_and_research")
+add_routes(
+    app, FinancialsAndResearchChain, path="/api/v1/agents/financials_and_research"
+)
+
 
 @app.get("/", tags=["Root"])
 def read_root():
-    return {
-        "message": "Welcome to MarketMinds v2.1. Go to /docs to see the new agent-specific endpoints."
-    }
+    return {"message": "Welcome to MarketMinds v2.2. Go to /docs to see all endpoints."}
