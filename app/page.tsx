@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Sparkles, TrendingUp, Plus, Trash2, Search, LogOut, LoaderCircle } from "lucide-react"
-import { LoginModal } from "@/components/LoginModal"
+import { LoginModal } from "@/components/loginModal"
 import ReactMarkdown from "react-markdown"
 
 export default function Home() {
