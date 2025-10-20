@@ -159,6 +159,7 @@ KnowledgeSearchChain = SingleTaskRunnable(task_name="research_task")
 CryptoAnalysisChain = SingleTaskRunnable(task_name="crypto_analysis_task")
 EconomicAnalysisChain = SingleTaskRunnable(task_name="economic_analysis_task")
 GlobalMarketChain = SingleTaskRunnable(task_name="global_market_analysis_task")
+
 CryptoHistoricalChain = (
     InputExtractorChain
     | RunnableLambda(lambda x: {"coin_id": x.get("coin_id"), "days": x.get("days", 30)})
@@ -184,6 +185,27 @@ FullAnalysisChain = InputExtractorChain | TripleTaskRunnable(
 )
 
 
+class HierarchicalCrewRunnable(Runnable):
+    def invoke(self, input: str, config: RunnableConfig = None) -> Dict[str, Any]:
+        crew_service = MarketmindsCrewService()
+        hierarchical_crew = crew_service.hierarchical_crew()
+
+        crew_inputs = {
+            "master_query": input,
+            "company": input,
+            "company_ticker": input,
+            "research_query": input,
+            "crypto_name": input,
+            "indicator_name": input,
+            "market_symbol": input,
+            "coin_id": input,
+            "days": 30,
+        }
+
+        result = hierarchical_crew.kickoff(inputs=crew_inputs)
+        return {"output": result}
+
+
 class RouteQuery(BaseModel):
     route: Literal[
         "news_analysis",
@@ -199,11 +221,13 @@ class RouteQuery(BaseModel):
         "crypto_historical",
         "news_and_crypto",
         "financials_and_crypto",
+        "reasoning_query",
     ]
 
 
 router_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 RouterChain = MASTER_ROUTER_PROMPT | router_llm.with_structured_output(RouteQuery)
+ReasoningChain = HierarchicalCrewRunnable()
 
 MasterBranch = RunnableBranch(
     (
@@ -257,6 +281,10 @@ MasterBranch = RunnableBranch(
     (
         lambda x: x["route"].route == "full_analysis",
         RunnableLambda(lambda x: x["input"]) | FullAnalysisChain,
+    ),
+    (
+        lambda x: x["route"].route == "reasoning_query",
+        RunnableLambda(lambda x: x["input"]) | ReasoningChain,
     ),
     NewsAnalysisChain,
 )

@@ -4,7 +4,9 @@ from crewai.tools import BaseTool
 from typing import Type
 from pydantic import BaseModel, Field
 
-class CryptoInfoInput(BaseModel):
+class CryptoToolInput(BaseModel):
+    """Input for crypto tools that take a coin name."""
+
     coin_name: str = Field(
         ..., description="The name of the cryptocurrency (e.g., 'Bitcoin', 'Ethereum')."
     )
@@ -13,9 +15,9 @@ class CryptoInfoInput(BaseModel):
 class CryptoInfoTool(BaseTool):
     name: str = "CoinGecko Crypto Profile Tool"
     description: str = (
-        "Primary tool to retrieve detailed information about a cryptocurrency."
+        "Primary tool to retrieve a detailed profile for a cryptocurrency."
     )
-    args_schema: Type[BaseModel] = CryptoInfoInput
+    args_schema: Type[BaseModel] = CryptoToolInput
 
     def _run(self, coin_name: str) -> str:
         api_key = os.getenv("COINGECKO_API_KEY")
@@ -44,7 +46,7 @@ class CryptoInfoTool(BaseTool):
 class CoinCapQuoteTool(BaseTool):
     name: str = "CoinCap Crypto Price Tool"
     description: str = "A fallback tool to get the real-time price of a cryptocurrency."
-    args_schema: Type[BaseModel] = CryptoInfoInput
+    args_schema: Type[BaseModel] = CryptoToolInput
 
     def _run(self, coin_name: str) -> str:
         url = f"https://api.coincap.io/v2/assets/{coin_name.lower()}"

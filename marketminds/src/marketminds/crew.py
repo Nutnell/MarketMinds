@@ -1,6 +1,7 @@
 import os
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task, tool
+from langchain_openai import ChatOpenAI
 
 from marketminds.tools.custom_tool import NewsSearchTool
 from marketminds.tools.stock_analysis_tools import (
@@ -17,7 +18,6 @@ from marketminds.tools.crypto_economic_tools import (
     FREDEconomicTool,
     WorldBankEconomicTool,
 )
-
 from marketminds.tools.market_data_tools import (
     TwelveDataQuoteTool,
     FMPQuoteTool,
@@ -29,6 +29,9 @@ def get_config_path(file_name):
     return os.path.join(os.path.dirname(__file__), "config", file_name)
 
 
+shared_llm = ChatOpenAI(model="gpt-4o-mini")
+
+
 @CrewBase
 class MarketmindsCrewService:
     agents_config = get_config_path("agents.yaml")
@@ -37,18 +40,6 @@ class MarketmindsCrewService:
     @tool
     def news_search_tool(self) -> NewsSearchTool:
         return NewsSearchTool()
-
-    @tool
-    def knowledge_base_tool(self) -> RAGTool:
-        return RAGTool()
-
-    @tool
-    def crypto_info_tool(self) -> CryptoInfoTool:
-        return CryptoInfoTool()
-
-    @tool
-    def crypto_historical_tool(self) -> CryptoHistoricalTool:
-        return CryptoHistoricalTool()
 
     @tool
     def polygon_quote_tool(self) -> PolygonQuoteTool:
@@ -67,12 +58,20 @@ class MarketmindsCrewService:
         return AlphaVantageFinancialsTool()
 
     @tool
+    def knowledge_base_tool(self) -> RAGTool:
+        return RAGTool()
+
+    @tool
     def coingecko_crypto_profile_tool(self) -> CryptoInfoTool:
         return CryptoInfoTool()
 
     @tool
     def coincap_crypto_price_tool(self) -> CoinCapQuoteTool:
         return CoinCapQuoteTool()
+
+    @tool
+    def crypto_historical_tool(self) -> CryptoHistoricalTool:
+        return CryptoHistoricalTool()
 
     @tool
     def fred_economic_tool(self) -> FREDEconomicTool:
@@ -87,12 +86,12 @@ class MarketmindsCrewService:
         return TwelveDataQuoteTool()
 
     @tool
-    def alpha_vantage_market_quote_tool(self) -> AlphaVantageMarketQuoteTool:
-        return AlphaVantageMarketQuoteTool()
-
-    @tool
     def fmp_quote_tool(self) -> FMPQuoteTool:
         return FMPQuoteTool()
+
+    @tool
+    def alpha_vantage_market_quote_tool(self) -> AlphaVantageMarketQuoteTool:
+        return AlphaVantageMarketQuoteTool()
 
     @agent
     def news_and_sentiment_agent(self) -> Agent:
@@ -149,6 +148,23 @@ class MarketmindsCrewService:
             ],
         )
 
+    @agent
+    def market_reasoning_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config["market_reasoning_agent"], llm=shared_llm
+        )
+
+    @agent
+    def manager_agent(self) -> Agent:
+        return Agent(
+            role="Lead Research Coordinator",
+            goal="Manage a team of agents to answer complex user queries.",
+            backstory="You are the central hub, an expert at understanding user intent and delegating tasks to the correct specialist.",
+            allow_delegation=True,
+            verbose=True,
+            llm=shared_llm,
+        )
+
     @task
     def news_summary_task(self) -> Task:
         return Task(
@@ -199,10 +215,33 @@ class MarketmindsCrewService:
         )
 
     @crew
-    def crew(self) -> Crew:
+    def hierarchical_crew(self) -> Crew:
+        reasoning_task = Task(
+            description="Synthesize the provided context from other agents to answer the user's original query: '{master_query}'. Formulate a cohesive, insightful final answer explaining the 'why' and 'what if'.",
+            expected_output="A detailed, insightful, and well-structured final answer.",
+            agent=self.market_reasoning_agent(),
+        )
+
+        manager_task = Task(
+            description="Analyze the user's complex query: '{master_query}'. Create a step-by-step plan. First, delegate data-gathering tasks to your specialist agents. CRITICAL: Once data is gathered, you MUST delegate a final synthesis task to the 'MarketReasoningAgent' using the context from the previous tasks.",
+            expected_output="A final, comprehensive report synthesized by the MarketReasoningAgent.",
+            agent=self.manager_agent(),
+        )
+
         return Crew(
             agents=self.agents,
-            tasks=self.tasks,
-            process=Process.sequential,
-            verbose=True,
+            tasks=[
+                self.news_summary_task(),
+                self.financial_analysis_task(),
+                self.research_task(),
+                self.crypto_analysis_task(),
+                self.economic_analysis_task(),
+                self.global_market_analysis_task(),
+                self.crypto_historical_analysis_task(),
+                reasoning_task,
+                manager_task,
+            ],
+            process=Process.hierarchical,
+            manager_llm=ChatOpenAI(model="gpt-4o-mini"),
+            verbose=1,
         )
