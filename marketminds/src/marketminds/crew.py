@@ -10,9 +10,19 @@ from marketminds.tools.stock_analysis_tools import (
     AlphaVantageFinancialsTool,
 )
 from marketminds.tools.rag_tools import RAGTool
-from marketminds.tools.crypto_economic_tools import CryptoInfoTool, MacroEconomicTool
-from marketminds.tools.market_data_tools import MarketQuoteTool
-from marketminds.tools.crypto_economic_tools import CryptoHistoricalTool
+from marketminds.tools.crypto_economic_tools import (
+    CryptoInfoTool,
+    CryptoHistoricalTool,
+    CoinCapQuoteTool,
+    FREDEconomicTool,
+    WorldBankEconomicTool,
+)
+
+from marketminds.tools.market_data_tools import (
+    TwelveDataQuoteTool,
+    FMPQuoteTool,
+    AlphaVantageMarketQuoteTool,
+)
 
 
 def get_config_path(file_name):
@@ -37,14 +47,6 @@ class MarketmindsCrewService:
         return CryptoInfoTool()
 
     @tool
-    def macro_economic_tool(self) -> MacroEconomicTool:
-        return MacroEconomicTool()
-
-    @tool
-    def market_quote_tool(self) -> MarketQuoteTool:
-        return MarketQuoteTool()
-
-    @tool
     def crypto_historical_tool(self) -> CryptoHistoricalTool:
         return CryptoHistoricalTool()
 
@@ -63,6 +65,34 @@ class MarketmindsCrewService:
     @tool
     def alpha_vantage_financials_tool(self) -> AlphaVantageFinancialsTool:
         return AlphaVantageFinancialsTool()
+
+    @tool
+    def coingecko_crypto_profile_tool(self) -> CryptoInfoTool:
+        return CryptoInfoTool()  # Renamed for clarity
+
+    @tool
+    def coincap_crypto_price_tool(self) -> CoinCapQuoteTool:
+        return CoinCapQuoteTool()
+
+    @tool
+    def fred_economic_tool(self) -> FREDEconomicTool:
+        return FREDEconomicTool()
+
+    @tool
+    def world_bank_economic_tool(self) -> WorldBankEconomicTool:
+        return WorldBankEconomicTool()
+
+    @tool
+    def twelve_data_quote_tool(self) -> TwelveDataQuoteTool:
+        return TwelveDataQuoteTool()
+
+    @tool
+    def alpha_vantage_market_quote_tool(self) -> AlphaVantageMarketQuoteTool:
+        return AlphaVantageMarketQuoteTool()
+
+    @tool
+    def fmp_quote_tool(self) -> FMPQuoteTool:
+        return FMPQuoteTool()
 
     @agent
     def news_and_sentiment_agent(self) -> Agent:
@@ -94,21 +124,29 @@ class MarketmindsCrewService:
     def crypto_analyst_agent(self) -> Agent:
         return Agent(
             config=self.agents_config["crypto_analyst_agent"],
-            tools=[self.crypto_info_tool(), self.crypto_historical_tool()],
+            tools=[
+                self.coingecko_crypto_profile_tool(),
+                self.crypto_historical_tool(),
+                self.coincap_crypto_price_tool(),
+            ],
         )
 
     @agent
     def economic_indicator_agent(self) -> Agent:
         return Agent(
             config=self.agents_config["economic_indicator_agent"],
-            tools=[self.macro_economic_tool()],
+            tools=[self.fred_economic_tool(), self.world_bank_economic_tool()],
         )
 
     @agent
     def global_markets_agent(self) -> Agent:
         return Agent(
             config=self.agents_config["global_markets_agent"],
-            tools=[self.market_quote_tool()],
+            tools=[
+                self.twelve_data_quote_tool(),
+                self.fmp_quote_tool(),
+                self.alpha_vantage_market_quote_tool(),  # This was originally self.market_quote_tool()
+            ],
         )
 
     @task
