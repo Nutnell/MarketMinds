@@ -4,8 +4,10 @@ from crewai.project import CrewBase, agent, crew, task, tool
 
 from marketminds.tools.custom_tool import NewsSearchTool
 from marketminds.tools.stock_analysis_tools import (
-    CompanyProfileTool,
-    FinancialStatementsTool,
+    PolygonQuoteTool,
+    YFinanceTool,
+    AlphaVantageProfileTool,
+    AlphaVantageFinancialsTool,
 )
 from marketminds.tools.rag_tools import RAGTool
 from marketminds.tools.crypto_economic_tools import CryptoInfoTool, MacroEconomicTool
@@ -27,14 +29,6 @@ class MarketmindsCrewService:
         return NewsSearchTool()
 
     @tool
-    def company_profile_tool(self) -> CompanyProfileTool:
-        return CompanyProfileTool()
-
-    @tool
-    def financial_statements_tool(self) -> FinancialStatementsTool:
-        return FinancialStatementsTool()
-
-    @tool
     def knowledge_base_tool(self) -> RAGTool:
         return RAGTool()
 
@@ -54,6 +48,22 @@ class MarketmindsCrewService:
     def crypto_historical_tool(self) -> CryptoHistoricalTool:
         return CryptoHistoricalTool()
 
+    @tool
+    def polygon_quote_tool(self) -> PolygonQuoteTool:
+        return PolygonQuoteTool()
+
+    @tool
+    def yfinance_tool(self) -> YFinanceTool:
+        return YFinanceTool()
+
+    @tool
+    def alpha_vantage_profile_tool(self) -> AlphaVantageProfileTool:
+        return AlphaVantageProfileTool()
+
+    @tool
+    def alpha_vantage_financials_tool(self) -> AlphaVantageFinancialsTool:
+        return AlphaVantageFinancialsTool()
+
     @agent
     def news_and_sentiment_agent(self) -> Agent:
         return Agent(
@@ -65,7 +75,12 @@ class MarketmindsCrewService:
     def stock_analyst_agent(self) -> Agent:
         return Agent(
             config=self.agents_config["stock_analyst_agent"],
-            tools=[self.company_profile_tool(), self.financial_statements_tool()],
+            tools=[
+                self.polygon_quote_tool(),
+                self.yfinance_tool(),
+                self.alpha_vantage_profile_tool(),
+                self.alpha_vantage_financials_tool(),
+            ],
         )
 
     @agent

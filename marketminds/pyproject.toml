@@ -21,6 +21,7 @@ dependencies = [
     "langchain_chroma",
     "langserve>=0.3.3",
     "sse_starlette",
+    "yfinance",
 
 
 
