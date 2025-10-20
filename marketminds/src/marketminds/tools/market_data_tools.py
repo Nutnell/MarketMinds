@@ -4,8 +4,6 @@ from crewai.tools import BaseTool
 from typing import Type
 from pydantic import BaseModel, Field
 
-
-# --- Input Schema (reusable for all tools in this file) ---
 class MarketSymbolInput(BaseModel):
     """Input schema for tools that take a market symbol."""
 
@@ -14,8 +12,6 @@ class MarketSymbolInput(BaseModel):
         description="The symbol for the asset (e.g., 'EUR/USD', 'XAU/USD' for Gold, '^IXIC' for NASDAQ).",
     )
 
-
-# --- Tool 1 (Primary): Twelve Data ---
 class TwelveDataQuoteTool(BaseTool):
     name: str = "Twelve Data Quote Tool"
     description: str = (
@@ -42,8 +38,6 @@ class TwelveDataQuoteTool(BaseTool):
         except Exception as e:
             return f"Error from Twelve Data: {e}. Try another tool."
 
-
-# --- Tool 2 (Fallback): FMP ---
 class FMPQuoteTool(BaseTool):
     name: str = "FMP Quote Tool"
     description: str = (
@@ -53,9 +47,8 @@ class FMPQuoteTool(BaseTool):
 
     def _run(self, symbol: str) -> str:
         api_key = os.getenv("FMP_API_KEY")
-        # FMP has different formats, so we adjust the symbol
         if "/" in symbol:
-            symbol = symbol.replace("/", "")  # EUR/USD -> EURUSD
+            symbol = symbol.replace("/", "")
 
         url = (
             f"https://financialmodelingprep.com/api/v3/quote/{symbol}?apikey={api_key}"
@@ -74,9 +67,6 @@ class FMPQuoteTool(BaseTool):
         except Exception as e:
             return f"Error from FMP: {e}. Try another tool."
 
-
-# --- Tool 3 (Last Resort): Alpha Vantage ---
-# This is your original MarketQuoteTool, renamed for clarity
 class AlphaVantageMarketQuoteTool(BaseTool):
     name: str = "Alpha Vantage Market Quote Tool"
     description: str = (

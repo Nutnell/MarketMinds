@@ -4,8 +4,6 @@ from crewai.tools import BaseTool
 from typing import Type
 from pydantic import BaseModel, Field
 
-
-# --- Crypto Tools ---
 class CryptoInfoInput(BaseModel):
     coin_name: str = Field(
         ..., description="The name of the cryptocurrency (e.g., 'Bitcoin', 'Ethereum')."
@@ -19,7 +17,6 @@ class CryptoInfoTool(BaseTool):
     )
     args_schema: Type[BaseModel] = CryptoInfoInput
 
-    # ... (rest of the class is unchanged)
     def _run(self, coin_name: str) -> str:
         api_key = os.getenv("COINGECKO_API_KEY")
         search_url = f"https://api.coingecko.com/api/v3/search?query={coin_name.lower()}&x_cg_demo_api_key={api_key}"
@@ -47,7 +44,7 @@ class CryptoInfoTool(BaseTool):
 class CoinCapQuoteTool(BaseTool):
     name: str = "CoinCap Crypto Price Tool"
     description: str = "A fallback tool to get the real-time price of a cryptocurrency."
-    args_schema: Type[BaseModel] = CryptoInfoInput  # Re-use the same input schema
+    args_schema: Type[BaseModel] = CryptoInfoInput
 
     def _run(self, coin_name: str) -> str:
         url = f"https://api.coincap.io/v2/assets/{coin_name.lower()}"
@@ -76,7 +73,6 @@ class CryptoHistoricalTool(BaseTool):
     args_schema: Type[BaseModel] = CryptoHistoricalInput
 
     def _run(self, coin_id: str, days: int) -> str:
-        # ... (implementation is unchanged)
         api_key = os.getenv("COINGECKO_API_KEY")
         url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days={days}&x_cg_demo_api_key={api_key}"
         try:
@@ -93,8 +89,6 @@ class CryptoHistoricalTool(BaseTool):
         except Exception as e:
             return f"Error fetching historical crypto data: {e}"
 
-
-# --- Economic Tools ---
 class EconomicIndicatorInput(BaseModel):
     indicator_name: str = Field(
         ...,
@@ -110,7 +104,6 @@ class FREDEconomicTool(BaseTool):
     args_schema: Type[BaseModel] = EconomicIndicatorInput
 
     def _run(self, indicator_name: str) -> str:
-        # ... (implementation is unchanged)
         api_key = os.getenv("FRED_API_KEY")
         indicator_map = {
             "gdp": "GDP",
@@ -148,7 +141,6 @@ class WorldBankEconomicTool(BaseTool):
     args_schema: Type[BaseModel] = WorldBankInput
 
     def _run(self, indicator_name: str, country_code: str) -> str:
-        # ... (implementation is unchanged)
         indicator_map = {"gdp": "NY.GDP.MKTP.CD", "inflation": "FP.CPI.TOTL.ZG"}
         indicator_code = indicator_map.get(indicator_name.lower())
         if not indicator_code:

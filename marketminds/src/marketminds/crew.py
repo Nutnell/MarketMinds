@@ -68,7 +68,7 @@ class MarketmindsCrewService:
 
     @tool
     def coingecko_crypto_profile_tool(self) -> CryptoInfoTool:
-        return CryptoInfoTool()  # Renamed for clarity
+        return CryptoInfoTool()
 
     @tool
     def coincap_crypto_price_tool(self) -> CoinCapQuoteTool:
@@ -145,7 +145,7 @@ class MarketmindsCrewService:
             tools=[
                 self.twelve_data_quote_tool(),
                 self.fmp_quote_tool(),
-                self.alpha_vantage_market_quote_tool(),  # This was originally self.market_quote_tool()
+                self.alpha_vantage_market_quote_tool(),
             ],
         )
 
