@@ -5,14 +5,15 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Sparkles, TrendingUp, Plus, Trash2, Search, LogOut, LoaderCircle } from "lucide-react"
-import { LoginModal } from "@/components/loginModal"
+import { LoginModal } from "@/components/LoginModal"
+import { SignupModal } from "@/components/SignupModal"
 import ReactMarkdown from "react-markdown"
 
 export default function Home() {
-  // All state and functions are correct, no changes needed here
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [authToken, setAuthToken] = useState<string | null>(null)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [showChat, setShowChat] = useState(false)
   const [watchlist, setWatchlist] = useState<string[]>(["AAPL", "TSLA", "BTC"])
@@ -22,68 +23,107 @@ export default function Home() {
 
   useEffect(() => {
     const token = localStorage.getItem("marketminds_token")
-    if (token) { setAuthToken(token); setIsLoggedIn(true) }
+    if (token) {
+      setAuthToken(token)
+      setIsLoggedIn(true)
+    }
   }, [])
-  const handleLoginSuccess = (token: string) => { setAuthToken(token); setIsLoggedIn(true); localStorage.setItem("marketminds_token", token); setIsLoginModalOpen(false); setShowChat(true) }
-  const handleLogout = () => { setAuthToken(null); setIsLoggedIn(false); localStorage.removeItem("marketminds_token"); setShowChat(false) }
-  const addToWatchlist = () => { if (newSymbol.trim() && !watchlist.includes(newSymbol.toUpperCase())) { setWatchlist([...watchlist, newSymbol.toUpperCase()]); setNewSymbol("") } }
-  const removeFromWatchlist = (symbol: string) => { setWatchlist(watchlist.filter((s) => s !== symbol)) }
+
+  const handleLoginSuccess = (token: string) => {
+    setAuthToken(token)
+    setIsLoggedIn(true)
+    localStorage.setItem("marketminds_token", token)
+    setIsLoginModalOpen(false)
+    setShowChat(true)
+  }
+
+  const handleSignupSuccess = () => {
+    setIsSignupModalOpen(false)
+    setIsLoginModalOpen(true)
+  }
+
+  const handleLogout = () => {
+    setAuthToken(null)
+    setIsLoggedIn(false)
+    localStorage.removeItem("marketminds_token")
+    setShowChat(false)
+  }
+
+  const addToWatchlist = () => {
+    if (newSymbol.trim() && !watchlist.includes(newSymbol.toUpperCase())) {
+      setWatchlist([...watchlist, newSymbol.toUpperCase()])
+      setNewSymbol("")
+    }
+  }
+
+  const removeFromWatchlist = (symbol: string) => {
+    setWatchlist(watchlist.filter((s) => s !== symbol))
+  }
 
   const sendMessage = async () => {
-    if (!inputValue.trim() || isLoading || !authToken) return;
+    if (!inputValue.trim() || isLoading || !authToken) return
 
-    const userMessage = { role: "user", content: inputValue };
-    const currentInput = inputValue;
-    setMessages((prev) => [...prev, userMessage]);
-    setInputValue("");
-    setIsLoading(true);
-    setMessages((prev) => [...prev, { role: "assistant", content: "Analyzing..." }]);
+    const userMessage = { role: "user", content: inputValue }
+    const currentInput = inputValue
+    setMessages((prev) => [...prev, userMessage])
+    setInputValue("")
+    setIsLoading(true)
+    setMessages((prev) => [...prev, { role: "assistant", content: "Analyzing..." }])
 
     try {
       const requestBody = {
-        input: { input: currentInput },
+        input: currentInput, // ✅ simplified input
         config: {},
         kwargs: {}
-      };
-
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-      const response = await fetch(
-        `${apiUrl}/api/v1/chat/invoke`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
-          },
-          body: JSON.stringify(requestBody),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
-      const aiResponse = { role: "assistant", content: data.output.output };
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL
+      const response = await fetch(`${apiUrl}/api/v1/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify(requestBody)
+      })
 
-      setMessages((prev) => [...prev.slice(0, -1), aiResponse]);
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      const content =
+        typeof data.output === "object" && data.output !== null && "output" in data.output
+          ? data.output.output
+          : data.output
+      const aiResponse = { role: "assistant", content: content || "Sorry, I couldn't generate a response." }
+
+      setMessages((prev) => [...prev.slice(0, -1), aiResponse])
     } catch (error: any) {
       const errorMessage = {
         role: "assistant",
-        content: `Sorry, something went wrong: ${error.message}`,
-      };
-      setMessages((prev) => [...prev.slice(0, -1), errorMessage]);
+        content: `Sorry, something went wrong: ${error.message}`
+      }
+      setMessages((prev) => [...prev.slice(0, -1), errorMessage])
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   // --- LANDING PAGE ---
   if (!showChat) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-        <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} onLoginSuccess={handleLoginSuccess} />
+        <LoginModal
+          isOpen={isLoginModalOpen}
+          onClose={() => setIsLoginModalOpen(false)}
+          onLoginSuccess={handleLoginSuccess}
+        />
+        <SignupModal
+          isOpen={isSignupModalOpen}
+          onClose={() => setIsSignupModalOpen(false)}
+          onSignupSuccess={handleSignupSuccess}
+        />
         <nav className="border-b border-slate-700 bg-slate-900/50 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -95,19 +135,33 @@ export default function Home() {
             <div className="flex items-center gap-4">
               {isLoggedIn ? (
                 <>
-                  <Button onClick={() => setShowChat(true)} variant="ghost" className="text-slate-300 hover:text-white">
+                  <Button
+                    onClick={() => setShowChat(true)}
+                    variant="ghost"
+                    className="text-slate-300 hover:text-white"
+                  >
                     Dashboard
                   </Button>
-                  <Button onClick={handleLogout} className="bg-red-500/20 text-red-400 hover:bg-red-500/30">
+                  <Button
+                    onClick={handleLogout}
+                    className="bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                  >
                     Sign Out
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button onClick={() => setIsLoginModalOpen(true)} variant="ghost" className="text-slate-300 hover:text-white">
+                  <Button
+                    onClick={() => setIsLoginModalOpen(true)}
+                    variant="ghost"
+                    className="text-slate-300 hover:text-white"
+                  >
                     Sign In
                   </Button>
-                  <Button onClick={() => setIsLoginModalOpen(true)} className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600">
+                  <Button
+                    onClick={() => setIsSignupModalOpen(true)}
+                    className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600"
+                  >
                     Get Started
                   </Button>
                 </>
@@ -126,12 +180,13 @@ export default function Home() {
                   Your AI Investment Research Co-Pilot
                 </h1>
                 <p className="text-xl text-slate-300 leading-relaxed">
-                  Synthesize market data, financial news, and company reports in seconds. Make informed investment decisions with AI-powered insights across stocks, crypto, and global markets.
+                  Synthesize market data, financial news, and company reports in seconds. Make informed
+                  investment decisions with AI-powered insights across stocks, crypto, and global markets.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button
-                  onClick={() => isLoggedIn ? setShowChat(true) : setIsLoginModalOpen(true)}
+                  onClick={() => (isLoggedIn ? setShowChat(true) : setIsSignupModalOpen(true))}
                   className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 text-white px-8 py-6 text-lg"
                 >
                   Start Researching
@@ -140,19 +195,27 @@ export default function Home() {
               <div className="grid grid-cols-2 gap-4 pt-8">
                 <div className="space-y-2">
                   <div className="text-emerald-400 font-semibold">Multi-Agent Analysis</div>
-                  <p className="text-sm text-slate-400">Stock, crypto, and news agents collaborate for comprehensive insights</p>
+                  <p className="text-sm text-slate-400">
+                    Stock, crypto, and news agents collaborate for comprehensive insights
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <div className="text-blue-400 font-semibold">Real-Time Data</div>
-                  <p className="text-sm text-slate-400">Access live market data and financial statements instantly</p>
+                  <p className="text-sm text-slate-400">
+                    Access live market data and financial statements instantly
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <div className="text-emerald-400 font-semibold">Watchlist Tracking</div>
-                  <p className="text-sm text-slate-400">Monitor your favorite assets and get intelligent alerts</p>
+                  <p className="text-sm text-slate-400">
+                    Monitor your favorite assets and get intelligent alerts
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <div className="text-blue-400 font-semibold">Sentiment Analysis</div>
-                  <p className="text-sm text-slate-400">Understand market sentiment from global news sources</p>
+                  <p className="text-sm text-slate-400">
+                    Understand market sentiment from global news sources
+                  </p>
                 </div>
               </div>
             </div>
@@ -165,13 +228,22 @@ export default function Home() {
                     <TrendingUp className="w-5 h-5 text-emerald-400" />
                   </div>
                   <div className="space-y-4">
-                    {[{ symbol: "AAPL", price: "$182.45", change: "+2.3%", color: "emerald" }, { symbol: "TSLA", price: "$242.80", change: "+5.1%", color: "blue" }, { symbol: "BTC", price: "$43,250", change: "+8.7%", color: "emerald" }].map((item) => (
-                      <div key={item.symbol} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                    {[
+                      { symbol: "AAPL", price: "$182.45", change: "+2.3%", color: "emerald" },
+                      { symbol: "TSLA", price: "$242.80", change: "+5.1%", color: "blue" },
+                      { symbol: "BTC", price: "$43,250", change: "+8.7%", color: "emerald" }
+                    ].map((item) => (
+                      <div
+                        key={item.symbol}
+                        className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg"
+                      >
                         <div>
                           <div className="font-semibold text-white">{item.symbol}</div>
                           <div className="text-sm text-slate-400">{item.price}</div>
                         </div>
-                        <div className={`text-sm font-semibold text-${item.color}-400`}>{item.change}</div>
+                        <div className={`text-sm font-semibold text-${item.color}-400`}>
+                          {item.change}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -187,7 +259,16 @@ export default function Home() {
   // --- CHAT UI ---
   return (
     <div className="h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex text-white">
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} onLoginSuccess={handleLoginSuccess} />
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
+      <SignupModal
+        isOpen={isSignupModalOpen}
+        onClose={() => setIsSignupModalOpen(false)}
+        onSignupSuccess={handleSignupSuccess}
+      />
       <div className="w-80 border-r border-slate-700 bg-slate-900/50 backdrop-blur-sm flex flex-col">
         <div className="p-6 border-b border-slate-700">
           <div className="flex items-center justify-between mb-4">
@@ -212,7 +293,12 @@ export default function Home() {
               {watchlist.map((symbol) => (
                 <div key={symbol} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors">
                   <span className="font-semibold text-white">{symbol}</span>
-                  <button onClick={() => removeFromWatchlist(symbol)} className="text-slate-400 hover:text-red-400 transition-colors">
+                  <button
+                    onClick={() => removeFromWatchlist(symbol)}
+                    className="text-slate-400 hover:text-red-400 transition-colors"
+                    title={`Remove ${symbol} from watchlist`}
+                    aria-label={`Remove ${symbol} from watchlist`}
+                  >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -258,7 +344,7 @@ export default function Home() {
                       <span>Analyzing...</span>
                     </div>
                   ) : (
-                    <div className="prose prose-invert prose-p:text-slate-100 prose-strong:text-white prose-headings:text-white prose-ul:text-slate-300">
+                    <div className="prose prose-invert prose-p:text-slate-100 prose-strong:text-white prose-headings:text-white prose-ul:text-slate-300 overflow-x-auto">
                       <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
                   )}
@@ -269,10 +355,19 @@ export default function Home() {
         </div>
         <div className="border-t border-slate-700 bg-slate-900/50 backdrop-blur-sm p-6">
           <div className="flex gap-3">
-            <Input disabled={isLoading} placeholder="Ask about AAPL, Bitcoin, market trends..." value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-              className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500" />
-            <Button disabled={isLoading} onClick={sendMessage}
-              className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 px-6">
+            <Input
+              disabled={isLoading}
+              placeholder="Ask about AAPL, Bitcoin, market trends..."
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+              className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+            />
+            <Button
+              disabled={isLoading}
+              onClick={sendMessage}
+              className="bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 px-6"
+            >
               {isLoading ? <LoaderCircle className="animate-spin" /> : "Send"}
             </Button>
           </div>
