@@ -1,54 +1,210 @@
-# Marketminds Crew
+# MarketMinds AI  
+**An Intelligent, Multi-Agent Investment Research Co-Pilot**
 
-Welcome to the Marketminds Crew project, powered by [crewAI](https://crewai.com). This template is designed to help you set up a multi-agent AI system with ease, leveraging the powerful and flexible framework provided by crewAI. Our goal is to enable your agents to collaborate effectively on complex tasks, maximizing their collective intelligence and capabilities.
+[![Built with FastAPI](https://img.shields.io/badge/Built%20with-FastAPI-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Frontend-Next.js](https://img.shields.io/badge/Frontend-Next.js-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=flat-square&logo=vercel)](https://vercel.com/)
+[![Database-PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-316192?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
+[![Automation-n8n](https://img.shields.io/badge/Automation-n8n-EA4C89?style=flat-square&logo=n8n)](https://n8n.io/)
 
-## Installation
+---
 
-Ensure you have Python >=3.10 <3.14 installed on your system. This project uses [UV](https://docs.astral.sh/uv/) for dependency management and package handling, offering a seamless setup and execution experience.
+## Overview  
+**MarketMinds AI** is a production-grade, full-stack application designed as an **AI-powered co-pilot for retail investors**.  
+It solves the problem of **information overload** by providing a **single conversational interface** to a **multi-agent backend** capable of:
 
-First, if you haven't already, install uv:
+- Retrieving and analyzing real-time market data  
+- Summarizing financial news  
+- Performing technical and sentiment analysis  
+- Synthesizing expert-level insights and investment briefings  
 
-```bash
-pip install uv
+This system unites **LLM reasoning**, **retrieval-augmented knowledge**, and **workflow automation** for a truly intelligent investment experience.
+
+---
+
+## Table of Contents  
+1. [Key Features](#-key-features)  
+2. [Tech Stack & Architecture](#-tech-stack--architecture)  
+3. [Backend Intelligence](#-backend-intelligence)  
+4. [Automation with n8n](#-automation-with-n8n)  
+5. [API Documentation](#-api-documentation)  
+6. [Local Setup](#-local-setup)  
+7. [Deployment](#-deployment)  
+8. [Future Roadmap](#-future-roadmap)
+
+---
+
+## Key Features  
+
+### Conversational Interface  
+Ask multi-layered questions naturally:  
+> “Give me the news and financials for NVIDIA and explain growth investing.”
+
+### Multi-Agent System  
+A coordinated crew of specialized AI agents:  
+- **Stock Analyst** — fundamentals and valuation  
+- **Market News Analyst** — real-time sentiment and trends  
+- **Crypto Agent** — token metrics and blockchain data  
+- **Economics Agent** — macro insights  
+- **Technical Analyst** — chart patterns and indicators  
+
+### Resilient Data Retrieval  
+If one API fails, others (e.g., Polygon, yfinance, Alpha Vantage) automatically take over — ensuring uninterrupted results.
+
+### RAG Knowledge Engine  
+Answers concept-level queries using a **ChromaDB vector store**, trained on curated investment literature.
+
+### Hierarchical Reasoning Crew  
+Complex questions activate a **Manager Agent**, which dynamically orchestrates other agents and synthesizes a coherent, expert-level conclusion.
+
+### Automated User Engagement  
+Via **n8n webhooks**, users automatically receive personalized onboarding reports and periodic AI market updates.
+
+---
+
+## Tech Stack & Architecture  
+
+| Layer | Technology |
+|-------|-------------|
+| **Backend** | FastAPI, LangServe, CrewAI, LangChain, SQLAlchemy |
+| **Frontend** | Next.js, React, TypeScript, Tailwind CSS, shadcn/ui |
+| **AI Models** | OpenAI `gpt-4o-mini` |
+| **Database** | PostgreSQL |
+| **Vector Store** | ChromaDB |
+| **Deployment** | Docker, Render (Backend & DB), Vercel (Frontend) |
+| **Automation** | n8n |
+
+### Architecture Overview  
+The Next.js frontend interacts with the FastAPI backend through a secure REST API.  
+The backend orchestrates:
+
+- AI chains and multi-agent crews  
+- SQLAlchemy ORM with PostgreSQL  
+- ChromaDB for contextual retrieval  
+- External APIs for market data and sentiment  
+
+This decoupled, modular design enables high scalability and resilience.
+
+---
+
+## Backend Intelligence  
+
+### Master Router Chain  
+Every request to `/api/v1/chat/invoke` is analyzed by a **Router Chain**, which classifies user intent (e.g. `news_analysis`, `reasoning_query`).
+
+### Specialized Branches  
+- **Single-Agent Runnable:** Handles focused queries like *“Current gold price?”*  
+- **Multi-Agent Runnable:** Merges data from multiple agents (e.g. *Apple news + financials*)  
+- **Hierarchical Crew Runnable:** Manages complex analytical workflows (*“Impact of inflation on growth stocks”*)  
+
+This architecture ensures optimal routing between reasoning, retrieval, and synthesis tasks.
+
+---
+
+## Automation with n8n  
+
+MarketMinds integrates seamlessly with **n8n** to demonstrate proactive AI engagement.
+
+| Stage | Action |
+|--------|---------|
+| **Trigger** | New user signs up via `/signup` |
+| **Webhook** | Backend sends data to n8n workflow |
+| **Generate** | After 5 minutes, n8n calls `/api/v1/agents/news_and_financials` to generate a sample report (e.g. for AAPL) |
+| **Engage** | Personalized welcome email sent to the user containing the full AI-generated report |
+
+> This automation highlights the platform’s ability to autonomously engage and educate users.
+
+---
+
+## API Documentation 
+
+### Main Endpoint  
+`POST /chat/invoke`  
+- **Description:** Accepts natural language investment queries  
+- **Auth:** JWT required  
+- **Example:**
+
+```json
+{
+  "query": "Summarize Tesla’s latest earnings and news sentiment."
+}
 ```
 
-Next, navigate to your project directory and install the dependencies:
+ Example Direct Agent Endpoint
+POST /agents/financials/invoke
 
-(Optional) Lock the dependencies and install them by using the CLI command:
-```bash
-crewai install
-```
-### Customizing
+Description: Fetches stock data directly via FinancialsAgent
 
-**Add your `OPENAI_API_KEY` into the `.env` file**
-
-- Modify `src/marketminds/config/agents.yaml` to define your agents
-- Modify `src/marketminds/config/tasks.yaml` to define your tasks
-- Modify `src/marketminds/crew.py` to add your own logic, tools and specific args
-- Modify `src/marketminds/main.py` to add custom inputs for your agents and tasks
-
-## Running the Project
-
-To kickstart your crew of AI agents and begin task execution, run this from the root folder of your project:
-
-```bash
-$ crewai run
+```json
+{
+  "ticker": "AAPL"
+}
 ```
 
-This command initializes the MarketMinds Crew, assembling the agents and assigning them tasks as defined in your configuration.
+ Full API documentation available at /docs.
 
-This example, unmodified, will run the create a `report.md` file with the output of a research on LLMs in the root folder.
+## Local Setup
+Prerequisites
+Python 3.11+
 
-## Understanding Your Crew
+Node.js & npm
 
-The MarketMinds Crew is composed of multiple AI agents, each with unique roles, goals, and tools. These agents collaborate on a series of tasks, defined in `config/tasks.yaml`, leveraging their collective skills to achieve complex objectives. The `config/agents.yaml` file outlines the capabilities and configurations of each agent in your crew.
+Docker Desktop
 
-## Support
+ Backend Setup
+```bash
+### Clone the repository
+git clone <repo_url>
+cd marketminds
+```
 
-For support, questions, or feedback regarding the Marketminds Crew or crewAI.
-- Visit our [documentation](https://docs.crewai.com)
-- Reach out to us through our [GitHub repository](https://github.com/joaomdmoura/crewai)
-- [Join our Discord](https://discord.com/invite/X4JWnZnxPb)
-- [Chat with our docs](https://chatg.pt/DWjSBZn)
+### Configure environment
+cp .env.example .env
+### Add your API keys, JWT_SECRET_KEY, DATABASE_URL
 
-Let's create wonders together with the power and simplicity of crewAI.
+### Install dependencies
+pip install -r requirements.txt
+
+### Start backend
+uvicorn app.main:app --reload
+Backend runs on → http://localhost:8000
+
+### Frontend Setup
+```bash
+cd frontend
+cp .env.local.example .env.local
+# Set: NEXT_PUBLIC_API_URL=http://localhost:8000
+
+npm install
+npm run dev
+```
+
+Frontend runs on → http://localhost:3000
+
+## Deployment
+Component	Platform	Notes
+Backend	Render	Dockerized FastAPI app
+Database	Render	Managed PostgreSQL instance
+Frontend	Vercel	Deployed with env vars for backend connection
+Automation	n8n Cloud / Self-hosted	Handles user onboarding and AI triggers
+
+CI/CD: Enabled via GitHub Actions — auto-deploys on push to main.
+
+## Future Roadmap
+ Daily AI Briefings: Automated scheduled reports for user watchlists
+
+ Advanced Technical Indicators: RSI, Bollinger Bands, Fibonacci via pandas-ta
+
+ Persistent Watchlists: Database-backed portfolios with real-time sync
+
+ OAuth Login: Secure Google and GitHub sign-in support
+
+© 2025 MarketMinds AI — Building smarter markets with intelligent automation.
+
+---
+
+
+
+
+
+
