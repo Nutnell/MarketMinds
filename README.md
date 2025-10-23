@@ -23,14 +23,14 @@ This system unites **LLM reasoning**, **retrieval-augmented knowledge**, and **w
 ---
 
 ## Table of Contents  
-1. [Key Features](#-key-features)  
-2. [Tech Stack & Architecture](#-tech-stack--architecture)  
-3. [Backend Intelligence](#-backend-intelligence)  
-4. [Automation with n8n](#-automation-with-n8n)  
-5. [API Documentation](#-api-documentation)  
-6. [Local Setup](#-local-setup)  
-7. [Deployment](#-deployment)  
-8. [Future Roadmap](#-future-roadmap)
+1. [Key Features](#key-features)  
+2. [Tech Stack & Architecture](#tech-stack--architecture)  
+3. [Backend Intelligence](#backend-intelligence)  
+4. [Automation with n8n](#automation-with-n8n)  
+5. [API Documentation](#api-documentation)  
+6. [Local Setup](#local-setup)  
+7. [Deployment](#deployment)  
+8. [Future Roadmap](#future-roadmap)
 
 ---
 
@@ -42,11 +42,13 @@ Ask multi-layered questions naturally:
 
 ### Multi-Agent System  
 A coordinated crew of specialized AI agents:  
-- **Stock Analyst** — fundamentals and valuation  
-- **Market News Analyst** — real-time sentiment and trends  
-- **Crypto Agent** — token metrics and blockchain data  
-- **Economics Agent** — macro insights  
-- **Technical Analyst** — chart patterns and indicators  
+- **Stock Analyst Agent** - Evaluates company fundamentals using a prioritized fallback strategy across Polygon, Yahoo Finance, and Alpha Vantage tools.  
+- **News & Sentiment Agent** - Summarizes recent news and market sentiment using real-time search tools.  
+- **Research Analyst Agent** - Explains investment philosophies by querying an internal knowledge base, with fallback to general expertise.
+- **Crypto Analyst Agent** - Provides token profiles, price data, and historical charts using CoinGecko, CoinCap, and charting tools. 
+- **Economic Indicator Agent** - Reports macroeconomic signals using FRED (US) and World Bank (global) datasets.
+- **Global Markets Agent** - Delivers Forex and commodity prices using Twelve Data, FMP, and Alpha Vantage.
+- **Market Reasoning Agent** - Synthesizes insights from other agents to answer high-level “why” and “what if” market questions.
 
 ### Resilient Data Retrieval  
 If one API fails, others (e.g., Polygon, yfinance, Alpha Vantage) automatically take over — ensuring uninterrupted results.
@@ -202,6 +204,13 @@ CI/CD: Enabled via GitHub Actions — auto-deploys on push to main.
 © 2025 MarketMinds AI — Building smarter markets with intelligent automation.
 
 ---
+
+
+
+
+
+
+
 
 
 
