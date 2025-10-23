@@ -156,7 +156,7 @@ Docker Desktop
  Backend Setup
 ```bash
 ### Clone the repository
-git clone <repo_url>
+git clone <https://github.com/Nutnell/MarketMinds.git>
 cd marketminds
 ```
 
